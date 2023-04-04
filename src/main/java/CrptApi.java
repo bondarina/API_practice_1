@@ -6,45 +6,52 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 
 public class CrptApi {
 
-    private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
+        private final int REQUEST_LIMIT;
+        private final long TIME_UNIT;
+        private final ScheduledExecutorService executor;
+         private int requestCount = 0;
 
-        private final int LIMIT;
-       TimeUnit timeUnit = TimeUnit.SECONDS;
-      long seconds = timeUnit.toSeconds(5);
-        private final AtomicInteger COUNTER = new AtomicInteger(0);
 
-        public CrptApi (TimeUnit timeUnit, int requestLimit) {
-            this.timeUnit=timeUnit;
-            this.LIMIT=requestLimit;
+        public CrptApi (int requestLimit, long timeUnit) {
+            this.TIME_UNIT=timeUnit;
+            this.REQUEST_LIMIT=requestLimit;
+            this.executor = Executors.newSingleThreadScheduledExecutor();
+            this.executor.scheduleAtFixedRate(this::resetRequestCount, 0, TIME_UNIT, TimeUnit.MILLISECONDS);
+
         }
 
-       public synchronized boolean isRequestAllowed() {
-            if (COUNTER.get() <= LIMIT) {
-                COUNTER.incrementAndGet();
-                return true;
-            } else {
-                return false;
+        public synchronized void sendRequest() throws InterruptedException {
+            if (requestCount >= REQUEST_LIMIT) {
+                wait();
             }
-       }
+            requestCount++;
+    }
 
-       public synchronized void releaseRequest() {
-            COUNTER.decrementAndGet();
-       }
+      private synchronized void  resetRequestCount() {
+            requestCount=0;
+            notifyAll();
+      }
 
-    public String CommissioningRfCreate(MyObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
+      public void shutdown() {
+            executor.shutdown();
+      }
+
+
+    private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
+
+    public String CommissioningRfCreate(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
         HttpClient httpClient = HttpClients.createDefault();
 
         HttpPost httpPost = new HttpPost(new URI(API_URL));
@@ -68,24 +75,24 @@ public class CrptApi {
        return responseBody;
     }
 
+
     public static void main(String[] args) throws IOException, URISyntaxException {
         String json = readFile("data.json");
 
         ObjectMapper mapper = new ObjectMapper();
-        MyObject myObject = mapper.readValue(json, MyObject.class);
+        JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
 
       // System.out.println(json);
 
-        CrptApi crpt = new CrptApi(TimeUnit.SECONDS, 5);
-        crpt.CommissioningRfCreate(myObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
-
-
+        CrptApi crpt = new CrptApi(5000, 5);
+        crpt.CommissioningRfCreate(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
     }
+
 
     private static String readFile(String filePath) throws IOException {
         StringBuilder sb = new StringBuilder();
         BufferedReader br = new BufferedReader(new InputStreamReader(
-                MyObject.class.getResourceAsStream(filePath)));
+                JsonRqToObject.class.getResourceAsStream(filePath)));
         String line;
         while ((line = br.readLine()) != null) {
             sb.append(line);
@@ -94,7 +101,9 @@ public class CrptApi {
         return sb.toString();
     }
 
-    static class MyObject {
+
+
+    static class JsonRqToObject {
         private String doc_id;
         private String doc_status;
         private String doc_type;
