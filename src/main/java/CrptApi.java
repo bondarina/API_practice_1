@@ -52,6 +52,8 @@ public class CrptApi {
     private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
 
     public String CommissioningRfCreate(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
+
+
         HttpClient httpClient = HttpClients.createDefault();
 
         HttpPost httpPost = new HttpPost(new URI(API_URL));
