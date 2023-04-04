@@ -77,6 +77,18 @@ public class CrptApi {
        return responseBody;
     }
 
+    private static String readFile(String filePath) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                JsonRqToObject.class.getResourceAsStream(filePath)));
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+        br.close();
+        return sb.toString();
+    }
+
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         String json = readFile("data.json");
@@ -88,19 +100,6 @@ public class CrptApi {
 
         CrptApi crpt = new CrptApi(5000, 5);
         crpt.CommissioningRfCreate(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
-    }
-
-
-    private static String readFile(String filePath) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                JsonRqToObject.class.getResourceAsStream(filePath)));
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-        br.close();
-        return sb.toString();
     }
 
 
