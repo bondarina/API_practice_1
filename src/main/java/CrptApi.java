@@ -102,6 +102,8 @@ public class CrptApi {
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return sb.toString();
 
