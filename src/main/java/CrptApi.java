@@ -9,6 +9,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -45,8 +46,6 @@ public class CrptApi {
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
     }
-
-
 
         public synchronized void sendRequest() throws InterruptedException {
             if (requestCount >= REQUEST_LIMIT) {
@@ -93,17 +92,19 @@ public class CrptApi {
        return responseBody;
     }
 
-    private static String readFile(String filePath) throws IOException {
+
+    private static String readFile(String filePath) {
         StringBuilder sb = new StringBuilder();
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                JsonRqToObject.class.getResourceAsStream(filePath)));
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                CrptApi.class.getResourceAsStream(filePath)))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
         }
-        br.close();
         return sb.toString();
-    }
+
 
 
     @Data
@@ -119,8 +120,6 @@ public class CrptApi {
         private String production_type;
         private String reg_date;
         private String reg_number;
-
-
     }
 }
 
