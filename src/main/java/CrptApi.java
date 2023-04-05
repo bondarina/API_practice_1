@@ -53,21 +53,16 @@ public class CrptApi {
                 } catch (InterruptedException e) {
                     System.out.println("Too many requests.");
                 }
-                finally {
-                    //resetting requestCount to 0
-                    requestCount.set(0);
-                    notifyAll();
-                }
                 } else {
             requestCount.incrementAndGet();
     }
             }
 
 
-    /* private synchronized void  resetRequestCount() {
-            requestCount=0;
+    private synchronized void  resetRequestCount() {
+            requestCount.set(0);
             notifyAll();
-      }*/
+      }
 
     private void shutdown() {
             executor.shutdown();
