@@ -22,17 +22,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CrptApi {
 
-        private final int REQUEST_LIMIT;
-        private final long TIME_UNIT;
-        private final ScheduledExecutorService executor;
-        private AtomicInteger requestCount = new AtomicInteger(0);
+    private final int REQUEST_LIMIT;
+    private final long TIME_UNIT;
+    private final ScheduledExecutorService executor;
+    private AtomicInteger requestCount = new AtomicInteger(0);
 
-        public CrptApi (int requestLimit, long timeUnit) {
-            this.TIME_UNIT=timeUnit;
-            this.REQUEST_LIMIT=requestLimit;
-            this.executor = Executors.newSingleThreadScheduledExecutor();
-            this.executor.scheduleAtFixedRate(this::resetRequestsCount, 0, TIME_UNIT, TimeUnit.MILLISECONDS);
-        }
+    public CrptApi(int requestLimit, long timeUnit) {
+        this.TIME_UNIT = timeUnit;
+        this.REQUEST_LIMIT = requestLimit;
+        this.executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor.scheduleAtFixedRate(this::resetRequestsCount, 0, TIME_UNIT, TimeUnit.MILLISECONDS);
+    }
 
     public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
         String json = readFile("data.json");
@@ -81,12 +81,12 @@ public class CrptApi {
         HttpEntity httpEntity = httpResponse.getEntity();
         String responseBody = EntityUtils.toString(httpEntity);
 
-       int statusCode = httpResponse.getStatusLine().getStatusCode();
-       if (statusCode != 200) {
-           throw new IOException("Unexpected status code: " + statusCode);
-       }
+        int statusCode = httpResponse.getStatusLine().getStatusCode();
+        if (statusCode != 200) {
+            throw new IOException("Unexpected status code: " + statusCode);
+        }
         shutdown();
-       return responseBody;
+        return responseBody;
     }
 
     private void countRequests() throws InterruptedException {
@@ -101,7 +101,7 @@ public class CrptApi {
         }
     }
 
-    private synchronized void  resetRequestsCount() {
+    private synchronized void resetRequestsCount() {
         requestCount.set(0);
         notifyAll();
     }
@@ -120,41 +120,40 @@ public class CrptApi {
         }
     }
 
+            @Data
+            static class Description {
+                private String participantInn;
+            }
+
+            @Data
+            static class Product {
+                private String certificate_document;
+                private String certificate_document_date;
+                private String certificate_document_number;
+                private String owner_inn;
+                private String producer_inn;
+                private String production_date;
+                private String tnved_code;
+                private String uit_code;
+                private String uitu_code;
+            }
+
     @Data
     static class JsonRqToObject {
-        @Data
-        public class Description{
-            public String participantInn;
-        }
-        @Data
-        public class Product{
-            public String certificate_document;
-            public String certificate_document_date;
-            public String certificate_document_number;
-            public String owner_inn;
-            public String producer_inn;
-            public String production_date;
-            public String tnved_code;
-            public String uit_code;
-            public String uitu_code;
-        }
-
-        @Data
-        public class Root{
-            public Description description;
-            public String doc_id;
-            public String doc_status;
-            public String doc_type;
-            public boolean importRequest;
-            public String owner_inn;
-            public String participant_inn;
-            public String producer_inn;
-            public String production_date;
-            public String production_type;
-            public ArrayList<Product> products;
-            public String reg_date;
-            public String reg_number;
-        }
+        private Description description;
+        private String doc_id;
+        private String doc_status;
+        private String doc_type;
+        private Boolean importRequest;
+        private String owner_inn;
+        private String participant_inn;
+        private String producer_inn;
+        private String production_date;
+        private String production_type;
+        private ArrayList<Product> products;
+        private String reg_date;
+        private String reg_number;
     }
-}
+    }
+
 
