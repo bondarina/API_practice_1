@@ -2,11 +2,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -62,27 +63,29 @@ public class CrptApi {
 
         countRequests();
 
-try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-    HttpPost httpPost = new HttpPost(new URI(API_URL));
+        HttpClient httpClient = HttpClients.createDefault();
 
-    StringEntity requestEntity = new StringEntity(document.toString(), signature);
-    httpPost.setEntity(requestEntity);
+        HttpPost httpPost = new HttpPost(new URI(API_URL));
 
-    httpPost.setHeader("Content-Type", "application/json");
-    httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
+        StringEntity requestEntity = new StringEntity(document.toString(), signature);
+        httpPost.setEntity(requestEntity);
 
-    HttpResponse httpResponse = httpClient.execute(httpPost);
-    HttpEntity httpEntity = httpResponse.getEntity();
-    String responseBody = EntityUtils.toString(httpEntity);
+        httpPost.setHeader("Content-Type", "application/json");
+        httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
 
-    int statusCode = httpResponse.getStatusLine().getStatusCode();
-    if (statusCode != 200) {
-        throw new IOException("Unexpected status code: " + statusCode);
+        HttpResponse httpResponse = httpClient.execute(httpPost);
+
+        HttpEntity httpEntity = httpResponse.getEntity();
+        String responseBody = EntityUtils.toString(httpEntity);
+
+        int statusCode = httpResponse.getStatusLine().getStatusCode();
+        if (statusCode != 200) {
+            throw new IOException("Unexpected status code: " + statusCode);
+        }
+
+        shutdown(executor);
+        return responseBody;
     }
-    return responseBody;
-}
-}
-       // HttpClient httpClient = HttpClients.createDefault();
 
     private void countRequests() {
         if (requestCount.get() >= REQUEST_LIMIT) {
@@ -101,18 +104,26 @@ try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
         notifyAll();
     }
 
-    public static void shutdown () {
+    public static void shutdown (ScheduledExecutorService executor)  {
+        executor.shutdown();
         try {
             if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
-                if (!executor.awaitTermination(2, TimeUnit.SECONDS))
+                if (!executor.awaitTermination(2, TimeUnit.SECONDS)){
                     System.out.println("Executor has not been terminated");
             }
+        }
         } catch (InterruptedException ie) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         } finally {
-            executor.shutdown();
+            if (executor != null) {
+                try {
+                    executor.close();
+                } catch (IOException ioe) {
+                    System.out.println("IOException caught");
+                }
+            }
         }
     }
 
