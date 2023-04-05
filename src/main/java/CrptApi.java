@@ -7,6 +7,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,10 +21,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CrptApi {
-
     private final int REQUEST_LIMIT;
     private final long TIME_UNIT;
-    private final ScheduledExecutorService executor;
+    private static ScheduledExecutorService executor;
     private AtomicInteger requestCount = new AtomicInteger(0);
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
@@ -41,6 +41,8 @@ public class CrptApi {
 
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
+
+        shutdown(executor);
     }
 
     private static String readFile(String filePath) {
@@ -80,7 +82,6 @@ public class CrptApi {
         if (statusCode != 200) {
             throw new IOException("Unexpected status code: " + statusCode);
         }
-        shutdown();
         return responseBody;
     }
 
@@ -101,12 +102,12 @@ public class CrptApi {
         notifyAll();
     }
 
-    private void shutdown() {
+    public static void shutdown (ScheduledExecutorService executor) {
         executor.shutdown();
         try {
-            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS))
+                if (!executor.awaitTermination(2, TimeUnit.SECONDS))
                     System.out.println("Executor has not been terminated");
             }
         } catch (InterruptedException ie) {
