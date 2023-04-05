@@ -7,7 +7,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,10 +44,7 @@ public class CrptApi {
 
     private static String readFile(String filePath) {
         StringBuilder sb = new StringBuilder();
-
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
-
-                // здесь какой из 2 классов всё же писать???
                 CrptApi.class.getResourceAsStream(filePath)))) {
             String line;
             while ((line = br.readLine()) != null) {
