@@ -9,7 +9,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -35,7 +34,7 @@ public class CrptApi {
         }
 
 
-    public static void main(String[] args) throws IOException, URISyntaxException {
+    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
         String json = readFile("data.json");
 
         ObjectMapper mapper = new ObjectMapper();
@@ -47,9 +46,13 @@ public class CrptApi {
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
     }
 
-        public synchronized void sendRequest() throws InterruptedException {
+        private void sendRequest() throws InterruptedException {
             if (requestCount >= REQUEST_LIMIT) {
-                wait();
+                try {
+                    throw new InterruptedException();
+                } catch (InterruptedException e) {
+                    System.out.println("Too many requests. ");
+                }
             }
             requestCount++;
     }
@@ -59,15 +62,16 @@ public class CrptApi {
             notifyAll();
       }
 
-      public void shutdown() {
+    private void shutdown() {
             executor.shutdown();
       }
 
 
     private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
 
-    public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
+    public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException, InterruptedException {
 
+        sendRequest();
 
         HttpClient httpClient = HttpClients.createDefault();
 
@@ -88,7 +92,7 @@ public class CrptApi {
        if (statusCode != 200) {
            throw new IOException("Unexpected status code: " + statusCode);
        }
-
+        shutdown();
        return responseBody;
     }
 
@@ -97,6 +101,8 @@ public class CrptApi {
         StringBuilder sb = new StringBuilder();
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
+
+                // здесь какой из 2 классов всё же писать???
                 CrptApi.class.getResourceAsStream(filePath)))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -106,7 +112,7 @@ public class CrptApi {
             throw new RuntimeException(e);
         }
         return sb.toString();
-
+    }
 
 
     @Data
