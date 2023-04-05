@@ -112,6 +112,12 @@ public class CrptApi {
         } catch (InterruptedException ie) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
+        } finally {
+            try {
+                executor.close();
+            } catch (IOException ioe) {
+                System.err.println("Error while shutting down executor: " + ioe.getMessage());
+            }
         }
     }
 
