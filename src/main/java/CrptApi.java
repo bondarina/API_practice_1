@@ -42,7 +42,6 @@ public class CrptApi {
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
 
-        shutdown();
     }
 
     private static String readFile(String filePath) {
