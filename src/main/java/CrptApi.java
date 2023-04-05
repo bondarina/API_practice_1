@@ -35,7 +35,7 @@ public class CrptApi {
         this.executor.scheduleAtFixedRate(this::resetRequestsCount, 0, TIME_UNIT, TimeUnit.MILLISECONDS);
     }
 
-    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
+    public static void main(String[] args) throws IOException, URISyntaxException {
         String json = readFile("data.json");
         JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
 
@@ -57,7 +57,7 @@ public class CrptApi {
         return sb.toString();
     }
 
-    public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException, InterruptedException {
+    public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
 
         countRequests();
 
@@ -84,7 +84,7 @@ public class CrptApi {
         return responseBody;
     }
 
-    private void countRequests() throws InterruptedException {
+    private void countRequests() {
         if (requestCount.get() >= REQUEST_LIMIT) {
             try {
                 throw new InterruptedException();
