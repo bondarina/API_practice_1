@@ -51,7 +51,7 @@ public class CrptApi {
                 try {
                     throw new InterruptedException();
                 } catch (InterruptedException e) {
-                    System.out.println("Too many requests. ");
+                    System.out.println("Too many requests.");
                 }
             }
             requestCount++;
@@ -62,8 +62,18 @@ public class CrptApi {
             notifyAll();
       }
 
-    private void shutdown() {
+    private void shutdown(ScheduledExecutorService executor) {
             executor.shutdown();
+            try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS))
+                    System.out.println("Executor has not been terminated");
+            }
+            } catch (InterruptedException ie) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
       }
 
 
