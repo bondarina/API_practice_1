@@ -16,13 +16,14 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CrptApi {
 
         private final int REQUEST_LIMIT;
         private final long TIME_UNIT;
         private final ScheduledExecutorService executor;
-        private int requestCount = 0;
+        private AtomicInteger requestCount = new AtomicInteger(0);
 
 
         public CrptApi (int requestLimit, long timeUnit) {
@@ -46,20 +47,27 @@ public class CrptApi {
     }
 
         private void sendRequest() throws InterruptedException {
-            if (requestCount >= REQUEST_LIMIT) {
+            if (requestCount.get() >= REQUEST_LIMIT) {
                 try {
                     throw new InterruptedException();
                 } catch (InterruptedException e) {
                     System.out.println("Too many requests.");
                 }
-            }
-            requestCount++;
+                finally {
+                    //resetting requestCount to 0
+                    requestCount.set(0);
+                    notifyAll();
+                }
+                } else {
+            requestCount.incrementAndGet();
     }
+            }
 
-      private synchronized void  resetRequestCount() {
+
+    /* private synchronized void  resetRequestCount() {
             requestCount=0;
             notifyAll();
-      }
+      }*/
 
     private void shutdown() {
             executor.shutdown();
