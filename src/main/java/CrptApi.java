@@ -25,7 +25,6 @@ public class CrptApi {
         private final ScheduledExecutorService executor;
         private AtomicInteger requestCount = new AtomicInteger(0);
 
-
         public CrptApi (int requestLimit, long timeUnit) {
             this.TIME_UNIT=timeUnit;
             this.REQUEST_LIMIT=requestLimit;
@@ -33,18 +32,14 @@ public class CrptApi {
             this.executor.scheduleAtFixedRate(this::resetRequestsCount, 0, TIME_UNIT, TimeUnit.MILLISECONDS);
         }
 
-
     public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
         String json = readFile("data.json");
         ObjectMapper mapper = new ObjectMapper();
         JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
 
-        // System.out.println(json);
-
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
     }
-
 
     private static String readFile(String filePath) {
         StringBuilder sb = new StringBuilder();
