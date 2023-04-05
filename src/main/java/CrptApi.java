@@ -2,9 +2,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
@@ -42,7 +42,7 @@ public class CrptApi {
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
 
-        shutdown(executor);
+        shutdown();
     }
 
     private static String readFile(String filePath) {
@@ -63,27 +63,27 @@ public class CrptApi {
 
         countRequests();
 
-        HttpClient httpClient = HttpClients.createDefault();
+try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+    HttpPost httpPost = new HttpPost(new URI(API_URL));
 
-        HttpPost httpPost = new HttpPost(new URI(API_URL));
+    StringEntity requestEntity = new StringEntity(document.toString(), signature);
+    httpPost.setEntity(requestEntity);
 
-        StringEntity requestEntity = new StringEntity(document.toString(), signature);
-        httpPost.setEntity(requestEntity);
+    httpPost.setHeader("Content-Type", "application/json");
+    httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
 
-        httpPost.setHeader("Content-Type", "application/json");
-        httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
+    HttpResponse httpResponse = httpClient.execute(httpPost);
+    HttpEntity httpEntity = httpResponse.getEntity();
+    String responseBody = EntityUtils.toString(httpEntity);
 
-        HttpResponse httpResponse = httpClient.execute(httpPost);
-
-        HttpEntity httpEntity = httpResponse.getEntity();
-        String responseBody = EntityUtils.toString(httpEntity);
-
-        int statusCode = httpResponse.getStatusLine().getStatusCode();
-        if (statusCode != 200) {
-            throw new IOException("Unexpected status code: " + statusCode);
-        }
-        return responseBody;
+    int statusCode = httpResponse.getStatusLine().getStatusCode();
+    if (statusCode != 200) {
+        throw new IOException("Unexpected status code: " + statusCode);
     }
+    return responseBody;
+}
+}
+       // HttpClient httpClient = HttpClients.createDefault();
 
     private void countRequests() {
         if (requestCount.get() >= REQUEST_LIMIT) {
@@ -102,8 +102,7 @@ public class CrptApi {
         notifyAll();
     }
 
-    public static void shutdown (ScheduledExecutorService executor) {
-        executor.shutdown();
+    public static void shutdown () {
         try {
             if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
@@ -113,6 +112,8 @@ public class CrptApi {
         } catch (InterruptedException ie) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
+        } finally {
+            executor.shutdown();
         }
     }
 
