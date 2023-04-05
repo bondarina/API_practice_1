@@ -25,6 +25,7 @@ public class CrptApi {
     private final long TIME_UNIT;
     private final ScheduledExecutorService executor;
     private AtomicInteger requestCount = new AtomicInteger(0);
+    private static final ObjectMapper mapper = new ObjectMapper();
     private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
 
     public CrptApi(int requestLimit, long timeUnit) {
@@ -36,7 +37,6 @@ public class CrptApi {
 
     public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
         String json = readFile("data.json");
-        ObjectMapper mapper = new ObjectMapper();
         JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
 
         CrptApi crpt = new CrptApi(5, 5000);
