@@ -7,12 +7,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -120,17 +122,39 @@ public class CrptApi {
 
     @Data
     static class JsonRqToObject {
-        private String doc_id;
-        private String doc_status;
-        private String doc_type;
-        private boolean importRequest;
-        private String owner_inn;
-        private String participant_inn;
-        private String producer_inn;
-        private String production_date;
-        private String production_type;
-        private String reg_date;
-        private String reg_number;
+        @Data
+        public class Description{
+            public String participantInn;
+        }
+        @Data
+        public class Product{
+            public String certificate_document;
+            public String certificate_document_date;
+            public String certificate_document_number;
+            public String owner_inn;
+            public String producer_inn;
+            public String production_date;
+            public String tnved_code;
+            public String uit_code;
+            public String uitu_code;
+        }
+
+        @Data
+        public class Root{
+            public Description description;
+            public String doc_id;
+            public String doc_status;
+            public String doc_type;
+            public boolean importRequest;
+            public String owner_inn;
+            public String participant_inn;
+            public String producer_inn;
+            public String production_date;
+            public String production_type;
+            public ArrayList<Product> products;
+            public String reg_date;
+            public String reg_number;
+        }
     }
 }
 
