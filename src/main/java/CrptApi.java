@@ -103,7 +103,7 @@ public class CrptApi {
         notifyAll();
     }
 
-    public static void shutdown (ScheduledExecutorService executor)  {
+    private static void shutdown (ScheduledExecutorService executor)  {
         executor.shutdown();
         try {
             if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
