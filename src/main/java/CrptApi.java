@@ -30,13 +30,12 @@ public class CrptApi {
             this.TIME_UNIT=timeUnit;
             this.REQUEST_LIMIT=requestLimit;
             this.executor = Executors.newSingleThreadScheduledExecutor();
-            this.executor.scheduleAtFixedRate(this::resetRequestCount, 0, TIME_UNIT, TimeUnit.MILLISECONDS);
+            this.executor.scheduleAtFixedRate(this::resetRequestsCount, 0, TIME_UNIT, TimeUnit.MILLISECONDS);
         }
 
 
     public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
         String json = readFile("data.json");
-
         ObjectMapper mapper = new ObjectMapper();
         JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
 
@@ -46,44 +45,29 @@ public class CrptApi {
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
     }
 
-        private void sendRequest() throws InterruptedException {
-            if (requestCount.get() >= REQUEST_LIMIT) {
-                try {
-                    throw new InterruptedException();
-                } catch (InterruptedException e) {
-                    System.out.println("Too many requests.");
-                }
-                } else {
-            requestCount.incrementAndGet();
+
+    private static String readFile(String filePath) {
+        StringBuilder sb = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+
+                // здесь какой из 2 классов всё же писать???
+                CrptApi.class.getResourceAsStream(filePath)))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return sb.toString();
     }
-            }
-
-
-    private synchronized void  resetRequestCount() {
-            requestCount.set(0);
-            notifyAll();
-      }
-
-    private void shutdown() {
-            executor.shutdown();
-            try {
-            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                executor.shutdownNow();
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS))
-                    System.out.println("Executor has not been terminated");
-            }
-            } catch (InterruptedException ie) {
-                executor.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-      }
-
 
     private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
 
     public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException, InterruptedException {
 
-        sendRequest();
+        countRequests();
 
         HttpClient httpClient = HttpClients.createDefault();
 
@@ -108,24 +92,36 @@ public class CrptApi {
        return responseBody;
     }
 
-
-    private static String readFile(String filePath) {
-        StringBuilder sb = new StringBuilder();
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-
-                // здесь какой из 2 классов всё же писать???
-                CrptApi.class.getResourceAsStream(filePath)))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
+    private void countRequests() throws InterruptedException {
+        if (requestCount.get() >= REQUEST_LIMIT) {
+            try {
+                throw new InterruptedException();
+            } catch (InterruptedException e) {
+                System.out.println("Too many requests.");
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } else {
+            requestCount.incrementAndGet();
         }
-        return sb.toString();
     }
 
+    private synchronized void  resetRequestsCount() {
+        requestCount.set(0);
+        notifyAll();
+    }
+
+    private void shutdown() {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS))
+                    System.out.println("Executor has not been terminated");
+            }
+        } catch (InterruptedException ie) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
 
     @Data
     static class JsonRqToObject {
