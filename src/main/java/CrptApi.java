@@ -25,6 +25,7 @@ public class CrptApi {
     private final long TIME_UNIT;
     private final ScheduledExecutorService executor;
     private AtomicInteger requestCount = new AtomicInteger(0);
+    private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
 
     public CrptApi(int requestLimit, long timeUnit) {
         this.TIME_UNIT = timeUnit;
@@ -55,8 +56,6 @@ public class CrptApi {
         }
         return sb.toString();
     }
-
-    private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
 
     public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException, InterruptedException {
 
