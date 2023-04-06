@@ -60,7 +60,9 @@ public class CrptApi {
 
     public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
 
-        countRequests();
+       //??
+        allowRequests();
+        releaseRequest();
 
         HttpClient httpClient = HttpClients.createDefault();
 
@@ -82,48 +84,45 @@ public class CrptApi {
             throw new IOException("Unexpected status code: " + statusCode);
         }
 
-        shutdown(executor);
+        // ??
+        shutdown();
+
         return responseBody;
     }
 
-    private void countRequests() {
-        if (requestCount.get() >= REQUEST_LIMIT) {
-            try {
-                throw new InterruptedException();
-            } catch (InterruptedException e) {
-                System.out.println("Too many requests.");
-            }
-        } else {
-            requestCount.incrementAndGet();
+    public synchronized boolean allowRequests() {
+        int requests = requestCount.incrementAndGet();
+        if (requests > REQUEST_LIMIT) {
+            requestCount.decrementAndGet();
+            return false;
         }
+        return true;
     }
 
-    private synchronized void resetRequestsCount() {
-        requestCount.set(0);
-        notifyAll();
+    public synchronized void releaseRequest() {
+        requestCount.decrementAndGet();
     }
 
-    private static void shutdown (ScheduledExecutorService executor)  {
+    // надо ли параметр executor в этот метод?
+    public void shutdown() {
         executor.shutdown();
         try {
             if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
                 if (!executor.awaitTermination(2, TimeUnit.SECONDS)){
                     System.out.println("Executor has not been terminated");
+                }
             }
-        }
         } catch (InterruptedException ie) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
-        } finally {
-            if (executor != null) {
-                try {
-                    executor.close();
-                } catch (IOException ioe) {
-                    System.out.println("IOException caught");
-                }
-            }
         }
+    }
+
+    private synchronized void resetRequestsCount() {
+        requestCount.set(0);
+        // ?
+        notifyAll();
     }
 
             @Data
