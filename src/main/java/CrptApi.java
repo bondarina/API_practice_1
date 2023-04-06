@@ -36,12 +36,12 @@ public class CrptApi {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         String json = readFile("jsonFile");
-        JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
+        Root rootJson = mapper.readValue(json, Root.class);
 
 
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.allowRequests();
-        crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
+        crpt.createRfCommission(rootJson, "bfad0002-9498-434b-afa2-5927fc1f6837");
         crpt.releaseRequest();
         crpt.shutdown();
 
@@ -61,7 +61,7 @@ public class CrptApi {
         return sb.toString();
     }
 
-    public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
+    public String createRfCommission(Root document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
 
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(new URI(API_URL));
@@ -139,7 +139,7 @@ public class CrptApi {
             }
 
     @Data
-    static class JsonRqToObject {
+    static class Root {
         private Description description;
         private String doc_id;
         private String doc_status;
