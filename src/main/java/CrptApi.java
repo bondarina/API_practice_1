@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
@@ -41,7 +42,7 @@ public class CrptApi {
 
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.allowRequests();
-        crpt.createRfCommission(rootJson, "{\"Id\":1,\"Password\":\"abc.Какого формата нужна подпись?У меня не получилось зарегистрироваться,т.к.сайт markirovka.demo.crpt не отвечает, потому не знаю, какую подпись сюда вписать\"}");
+        crpt.createRfCommission(rootJson, "{\"Id\":1,\"Password\":\"abc.(URL ismp.crpt.ru не отвечает)\"}");
         crpt.releaseRequest();
         crpt.shutdown();
 
@@ -66,7 +67,7 @@ public class CrptApi {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(new URI(API_URL));
 
-        StringEntity requestEntity = new StringEntity(document.toString(), signature);
+        StringEntity requestEntity = new StringEntity(document.toString(), StandardCharsets.UTF_8);
         httpPost.setEntity(requestEntity);
 
         httpPost.setHeader("Content-Type","multipart/form-data;application/json;charset=utf-8");
