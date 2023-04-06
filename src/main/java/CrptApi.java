@@ -7,7 +7,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -63,9 +62,6 @@ public class CrptApi {
 
     public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
 
-       //??
-       // allowRequests();
-
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(new URI(API_URL));
 
@@ -81,14 +77,11 @@ public class CrptApi {
         String responseBody = EntityUtils.toString(httpEntity);
 
         int statusCode = httpResponse.getStatusLine().getStatusCode();
-        if (statusCode != 200) {
+        if (statusCode != (200 | 201)) {
             throw new IOException("Unexpected status code: " + statusCode);
         }
 
-      //  releaseRequest();
-        // ??
-      //  shutdown();
-
+        System.out.println(responseBody);
         return responseBody;
     }
 
@@ -105,7 +98,6 @@ public class CrptApi {
         requestCount.decrementAndGet();
     }
 
-    // надо ли параметр executor в этот метод?
     public void shutdown() {
         executor.shutdown();
         try {
@@ -123,7 +115,6 @@ public class CrptApi {
 
     private synchronized void resetRequestsCount() {
         requestCount.set(0);
-        // ?
         notifyAll();
     }
 
