@@ -85,7 +85,7 @@ public class CrptApi {
         return responseBody;
     }
 
-    public synchronized boolean allowRequests() {
+    public /*synchronized*/ boolean allowRequests() {
         int requests = requestCount.incrementAndGet();
         if (requests > REQUEST_LIMIT) {
             requestCount.decrementAndGet();
