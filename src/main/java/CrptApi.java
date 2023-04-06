@@ -41,7 +41,7 @@ public class CrptApi {
 
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.allowRequests();
-        crpt.createRfCommission(rootJson, "{\"Id\":1,\"Password\":\"abc\"}");
+        crpt.createRfCommission(rootJson, "{\"Id\":1,\"Password\":\"abc.Какого формата нужна подпись?У меня не получилось зарегистрироваться,т.к.сайт markirovka.demo.crpt не отвечает, потому не знаю, какую подпись сюда вписать\"}");
         crpt.releaseRequest();
         crpt.shutdown();
 
