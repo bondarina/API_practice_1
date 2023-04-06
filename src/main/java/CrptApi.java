@@ -69,7 +69,7 @@ public class CrptApi {
         StringEntity requestEntity = new StringEntity(document.toString(), signature);
         httpPost.setEntity(requestEntity);
 
-       // httpPost.setHeader("Content-Type", "application/json");
+       /// httpPost.setHeader("Content-Type", "application/json");
       // httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
 
 
