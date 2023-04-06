@@ -40,7 +40,10 @@ public class CrptApi {
         JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
 
         CrptApi crpt = new CrptApi(5, 5000);
+        crpt.allowRequests();
         crpt.createRfCommission(jsonRqToObject, "bfad0002-9498-434b-afa2-5927fc1f6837");
+        crpt.releaseRequest();
+        crpt.shutdown();
 
     }
 
@@ -61,11 +64,9 @@ public class CrptApi {
     public String createRfCommission(JsonRqToObject document, String signature) throws IOException, URISyntaxException, UnsupportedCharsetException {
 
        //??
-        allowRequests();
-        releaseRequest();
+       // allowRequests();
 
         HttpClient httpClient = HttpClients.createDefault();
-
         HttpPost httpPost = new HttpPost(new URI(API_URL));
 
         StringEntity requestEntity = new StringEntity(document.toString(), signature);
@@ -84,8 +85,9 @@ public class CrptApi {
             throw new IOException("Unexpected status code: " + statusCode);
         }
 
+      //  releaseRequest();
         // ??
-        shutdown();
+      //  shutdown();
 
         return responseBody;
     }
