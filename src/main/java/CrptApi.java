@@ -25,7 +25,7 @@ public class CrptApi {
     private static ScheduledExecutorService executor;
     private AtomicInteger requestCount = new AtomicInteger(0);
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create";
+    private static final String API_URL = "https://ismp.crpt.ru/api/v3/lk/documents/commissioning/contract/create?pg=milk";
 
     public CrptApi(int requestLimit, long timeUnit) {
         this.TIME_UNIT = timeUnit;
@@ -41,7 +41,7 @@ public class CrptApi {
 
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.allowRequests();
-        crpt.createRfCommission(rootJson, "bfad0002-9498-434b-afa2-5927fc1f6837");
+        crpt.createRfCommission(rootJson, "{\"Id\":1,\"Password\":\"abc\"}");
         crpt.releaseRequest();
         crpt.shutdown();
 
@@ -69,9 +69,9 @@ public class CrptApi {
         StringEntity requestEntity = new StringEntity(document.toString(), signature);
         httpPost.setEntity(requestEntity);
 
-       /// httpPost.setHeader("Content-Type", "application/json");
-      // httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
-
+        httpPost.setHeader("Content-Type","multipart/form-data;application/json;charset=utf-8");
+        httpPost.setHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX....dbj6KCaQUtSwtsZDdghGYJt9tbtPUApZB0ctnjXWHoA");
+        httpPost.setHeader("Accept", "*/*");
 
         HttpResponse httpResponse = httpClient.execute(httpPost);
 
