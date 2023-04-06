@@ -67,7 +67,7 @@ public class CrptApi {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(new URI(API_URL));
 
-        StringEntity requestEntity = new StringEntity(document.toString(), StandardCharsets.UTF_8);
+        StringEntity requestEntity = new StringEntity(document.toString(), StandardCharsets.US_ASCII);
         httpPost.setEntity(requestEntity);
 
         httpPost.setHeader("Content-Type","multipart/form-data;application/json;charset=utf-8");
