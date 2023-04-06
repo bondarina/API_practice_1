@@ -35,8 +35,9 @@ public class CrptApi {
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        String json = readFile("data.json");
+        String json = readFile("jsonFile");
         JsonRqToObject jsonRqToObject = mapper.readValue(json, JsonRqToObject.class);
+
 
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.allowRequests();
@@ -69,7 +70,8 @@ public class CrptApi {
         httpPost.setEntity(requestEntity);
 
        // httpPost.setHeader("Content-Type", "application/json");
-        httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
+      // httpPost.setHeader("Authorization", " Bearer eyJhbGciOiJIUzI1NiIsInR5cC....T7QquJwtJxiFxDxpYitE7lcNebiDWe9MQOTa6E62zjs");
+
 
         HttpResponse httpResponse = httpClient.execute(httpPost);
 
