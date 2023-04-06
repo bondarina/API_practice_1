@@ -42,7 +42,8 @@ public class CrptApi {
 
         CrptApi crpt = new CrptApi(5, 5000);
         crpt.allowRequests();
-        crpt.createRfCommission(rootJson, "{\"Id\":1,\"Password\":\"abc.(URL ismp.crpt.ru не отвечает)\"}");
+        crpt.createRfCommission(rootJson, "{\"Id\":1,\"Password\":\"abc.(URL ismp.crpt.ru и markirovka.demo " +
+                "не отвечают, авторизоваться не получается, потому программа отвечает кодом 401)\"}");
         crpt.releaseRequest();
         crpt.shutdown();
 
